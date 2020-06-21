@@ -77,7 +77,7 @@ namespace kanazawa.Function
     public partial class User
     {
         [JsonProperty("description")]
-        public Description Description { get; set; }
+        public string Description { get; set; }
 
         [JsonProperty("facebook_id")]
         public string FacebookId { get; set; }
@@ -89,10 +89,10 @@ namespace kanazawa.Function
         public long FollowersCount { get; set; }
 
         [JsonProperty("github_login_name")]
-        public GithubLoginName GithubLoginName { get; set; }
+        public string GithubLoginName { get; set; }
 
         [JsonProperty("id")]
-        public Id Id { get; set; }
+        public string Id { get; set; }
 
         [JsonProperty("items_count")]
         public long ItemsCount { get; set; }
@@ -104,7 +104,7 @@ namespace kanazawa.Function
         public string Location { get; set; }
 
         [JsonProperty("name")]
-        public Name Name { get; set; }
+        public string Name { get; set; }
 
         [JsonProperty("organization")]
         public string Organization { get; set; }
@@ -125,14 +125,6 @@ namespace kanazawa.Function
         public string WebsiteUrl { get; set; }
     }
 
-    public enum Description { 新人Se };
-
-    public enum GithubLoginName { YoshiakiKanazawa };
-
-    public enum Id { SeAmericanFootball };
-
-    public enum Name { YoshiakiKanazawa };
-
     public partial class QiitaInformation
     {
         public static QiitaInformation[] FromJson(string json) => JsonConvert.DeserializeObject<QiitaInformation[]>(json, kanazawa.Function.Converter.Settings);
@@ -151,148 +143,8 @@ namespace kanazawa.Function
             DateParseHandling = DateParseHandling.None,
             Converters =
             {
-                DescriptionConverter.Singleton,
-                GithubLoginNameConverter.Singleton,
-                IdConverter.Singleton,
-                NameConverter.Singleton,
                 new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
             },
         };
-    }
-
-    internal class DescriptionConverter : JsonConverter
-    {
-        public override bool CanConvert(Type t) => t == typeof(Description) || t == typeof(Description?);
-
-        public override object ReadJson(JsonReader reader, Type t, object existingValue, JsonSerializer serializer)
-        {
-            if (reader.TokenType == JsonToken.Null) return null;
-            var value = serializer.Deserialize<string>(reader);
-            if (value == "新人SE")
-            {
-                return Description.新人Se;
-            }
-            throw new Exception("Cannot unmarshal type Description");
-        }
-
-        public override void WriteJson(JsonWriter writer, object untypedValue, JsonSerializer serializer)
-        {
-            if (untypedValue == null)
-            {
-                serializer.Serialize(writer, null);
-                return;
-            }
-            var value = (Description)untypedValue;
-            if (value == Description.新人Se)
-            {
-                serializer.Serialize(writer, "新人SE");
-                return;
-            }
-            throw new Exception("Cannot marshal type Description");
-        }
-
-        public static readonly DescriptionConverter Singleton = new DescriptionConverter();
-    }
-
-    internal class GithubLoginNameConverter : JsonConverter
-    {
-        public override bool CanConvert(Type t) => t == typeof(GithubLoginName) || t == typeof(GithubLoginName?);
-
-        public override object ReadJson(JsonReader reader, Type t, object existingValue, JsonSerializer serializer)
-        {
-            if (reader.TokenType == JsonToken.Null) return null;
-            var value = serializer.Deserialize<string>(reader);
-            if (value == "Yoshiaki-Kanazawa")
-            {
-                return GithubLoginName.YoshiakiKanazawa;
-            }
-            throw new Exception("Cannot unmarshal type GithubLoginName");
-        }
-
-        public override void WriteJson(JsonWriter writer, object untypedValue, JsonSerializer serializer)
-        {
-            if (untypedValue == null)
-            {
-                serializer.Serialize(writer, null);
-                return;
-            }
-            var value = (GithubLoginName)untypedValue;
-            if (value == GithubLoginName.YoshiakiKanazawa)
-            {
-                serializer.Serialize(writer, "Yoshiaki-Kanazawa");
-                return;
-            }
-            throw new Exception("Cannot marshal type GithubLoginName");
-        }
-
-        public static readonly GithubLoginNameConverter Singleton = new GithubLoginNameConverter();
-    }
-
-    internal class IdConverter : JsonConverter
-    {
-        public override bool CanConvert(Type t) => t == typeof(Id) || t == typeof(Id?);
-
-        public override object ReadJson(JsonReader reader, Type t, object existingValue, JsonSerializer serializer)
-        {
-            if (reader.TokenType == JsonToken.Null) return null;
-            var value = serializer.Deserialize<string>(reader);
-            if (value == "SE_AmericanFootball")
-            {
-                return Id.SeAmericanFootball;
-            }
-            throw new Exception("Cannot unmarshal type Id");
-        }
-
-        public override void WriteJson(JsonWriter writer, object untypedValue, JsonSerializer serializer)
-        {
-            if (untypedValue == null)
-            {
-                serializer.Serialize(writer, null);
-                return;
-            }
-            var value = (Id)untypedValue;
-            if (value == Id.SeAmericanFootball)
-            {
-                serializer.Serialize(writer, "SE_AmericanFootball");
-                return;
-            }
-            throw new Exception("Cannot marshal type Id");
-        }
-
-        public static readonly IdConverter Singleton = new IdConverter();
-    }
-
-    internal class NameConverter : JsonConverter
-    {
-        public override bool CanConvert(Type t) => t == typeof(Name) || t == typeof(Name?);
-
-        public override object ReadJson(JsonReader reader, Type t, object existingValue, JsonSerializer serializer)
-        {
-            if (reader.TokenType == JsonToken.Null) return null;
-            var value = serializer.Deserialize<string>(reader);
-            if (value == "Yoshiaki Kanazawa")
-            {
-                return Name.YoshiakiKanazawa;
-            }
-            throw new Exception("Cannot unmarshal type Name");
-        }
-
-        public override void WriteJson(JsonWriter writer, object untypedValue, JsonSerializer serializer)
-        {
-            if (untypedValue == null)
-            {
-                serializer.Serialize(writer, null);
-                return;
-            }
-            var value = (Name)untypedValue;
-            if (value == Name.YoshiakiKanazawa)
-            {
-                serializer.Serialize(writer, "Yoshiaki Kanazawa");
-                return;
-            }
-            throw new Exception("Cannot marshal type Name");
-        }
-
-        public static readonly NameConverter Singleton = new NameConverter();
     }
 }
