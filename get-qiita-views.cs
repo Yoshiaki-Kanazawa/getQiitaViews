@@ -25,10 +25,10 @@ namespace kanazawa.Function
 
             // デシリアライズ時の設定
             var settings = new JsonSerializerSettings
-                {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    MissingMemberHandling = MissingMemberHandling.Ignore
-                };
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                MissingMemberHandling = MissingMemberHandling.Ignore
+            };
 
             // デシリアライズ
             List<QiitaInformationModel> models = JsonConvert.DeserializeObject<List<QiitaInformationModel>>(json, settings);
@@ -43,6 +43,24 @@ namespace kanazawa.Function
                 log.LogInformation($"views: {model.PageViewsCount}");
             }
 
+            // データを保存
+            saveData(models, log);
+        }
+
+        private static async Task<string> GetJson(string url)
+        {
+            var httpClient = new System.Net.Http.HttpClient();
+            // OAuth 2.0 Authorization Headerの設定
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Constants.Qiita_Access_Token);
+
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            HttpResponseMessage response = await httpClient.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            return result;
+        }
+
+        private static void saveData(List<QiitaInformationModel> models, ILogger log){
             // DB接続文字列の取得
             var connectionString = Constants.Conection_String;
 
@@ -58,7 +76,6 @@ namespace kanazawa.Function
                     {
                         try
                         {
-
                             foreach (var model in models)
                             {
                                 using (var command = new SqlCommand() { Connection = connection, Transaction = transaction })
@@ -92,7 +109,7 @@ namespace kanazawa.Function
                 }
                 catch (Exception exception)
                 {
-                    Console.WriteLine(exception.Message);
+                    log.LogInformation(exception.Message);
                     throw;
                 }
                 finally
@@ -101,20 +118,6 @@ namespace kanazawa.Function
                     connection.Close();
                 }
             }
-
-        }
-
-        private static async Task<string> GetJson(string url)
-        {
-            var httpClient = new System.Net.Http.HttpClient();
-            // OAuth 2.0 Authorization Headerの設定
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Constants.Qiita_Access_Token);
-
-            var request = new HttpRequestMessage(HttpMethod.Get, url);
-            HttpResponseMessage response = await httpClient.SendAsync(request);
-            string result = await response.Content.ReadAsStringAsync();
-
-            return result;
         }
     }
 }
