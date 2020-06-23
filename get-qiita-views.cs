@@ -43,8 +43,34 @@ namespace kanazawa.Function
                 log.LogInformation($"views: {model.PageViewsCount}");
             }
 
-            // データを保存
-            saveData(models, log);
+            // DB接続文字列の取得
+            var connectionString = Constants.Conection_String;
+
+            // データ保存
+            using (var connection = new SqlConnection(connectionString))
+            {
+                // データベースの接続開始
+                connection.Open();
+
+                try
+                {
+                    // マスタテーブルの更新チェック
+                    Database.checkMasterData(models, log, connection);
+
+                    // データを保存
+                    Database.saveData(models, log, connection);
+                }
+                catch (Exception exception)
+                {
+                    log.LogInformation(exception.Message);
+                    throw;
+                }
+                finally
+                {
+                    // データベースの接続終了
+                    connection.Close();
+                }
+            }
         }
 
         private static async Task<string> GetJson(string url)
@@ -58,66 +84,6 @@ namespace kanazawa.Function
             string result = await response.Content.ReadAsStringAsync();
 
             return result;
-        }
-
-        private static void saveData(List<QiitaInformationModel> models, ILogger log){
-            // DB接続文字列の取得
-            var connectionString = Constants.Conection_String;
-
-            // データ保存
-            using (var connection = new SqlConnection(connectionString))
-            {
-                try
-                {
-                    // データベースの接続開始
-                    connection.Open();
-
-                    using (var transaction = connection.BeginTransaction())
-                    {
-                        try
-                        {
-                            foreach (var model in models)
-                            {
-                                using (var command = new SqlCommand() { Connection = connection, Transaction = transaction })
-                                {
-                                    // SQLの準備
-                                    command.CommandText = @"INSERT INTO page_views_count VALUES (@ID, @CREATED_AT, @TITLE, @PAGE_VIEWS_COUNT)";
-                                    command.Parameters.Add(new SqlParameter("@ID", model.Id));
-                                    command.Parameters.Add(new SqlParameter("@CREATED_AT", DateTime.Now.ToString("yyyy/MM/dd HH")));
-                                    command.Parameters.Add(new SqlParameter("@TITLE", model.Title));
-                                    command.Parameters.Add(new SqlParameter("@PAGE_VIEWS_COUNT", model.PageViewsCount));
-
-                                    // SQLの実行
-                                    command.ExecuteNonQuery();
-
-                                    log.LogInformation($"succeeded to insert data: {model.Title}");
-                                }
-                            }
-
-                            // コミット
-                            transaction.Commit();
-                            log.LogInformation("Committed");
-                        }
-                        catch
-                        {
-                            // ロールバック
-                            transaction.Rollback();
-                            log.LogInformation("Rollbacked");
-                            throw;
-                        }
-                    }
-                }
-                catch (Exception exception)
-                {
-                    log.LogInformation(exception.Message);
-                    throw;
-                }
-                finally
-                {
-                    // データベースの接続終了
-                    connection.Close();
-                }
-            }
         }
     }
 }
