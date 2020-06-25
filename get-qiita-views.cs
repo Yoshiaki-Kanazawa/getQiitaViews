@@ -1,6 +1,5 @@
 using System;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -19,7 +18,7 @@ namespace kanazawa.Function
             log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
 
             // Qiita APIのURL
-            string url = "https://qiita.com/api/v2/users/" + Constants.Qiita_User_Name + "/items";
+            string url = "https://qiita.com/api/v2/users/" + await Parameter.getQiitaUserName() + "/items";
             // 投稿記事情報取得
             string json = await GetJson(url);
 
@@ -44,7 +43,7 @@ namespace kanazawa.Function
             }
 
             // DB接続文字列の取得
-            var connectionString = Constants.Conection_String;
+            var connectionString = await Parameter.getConnectionString();
 
             // データ保存
             using (var connection = new SqlConnection(connectionString))
@@ -77,7 +76,7 @@ namespace kanazawa.Function
         {
             var httpClient = new System.Net.Http.HttpClient();
             // OAuth 2.0 Authorization Headerの設定
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Constants.Qiita_Access_Token);
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await Parameter.getQiitaAccessToken());
 
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             HttpResponseMessage response = await httpClient.SendAsync(request);
