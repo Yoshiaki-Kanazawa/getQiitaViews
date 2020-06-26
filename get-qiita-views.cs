@@ -14,7 +14,7 @@ namespace kanazawa.Function
     public static class get_qiita_views
     {
         [FunctionName("get_qiita_views")]
-        public static async void Run([TimerTrigger("0 0 * * * *")]TimerInfo myTimer, ILogger log)
+        public static async void Run([TimerTrigger("0 * * * * *")]TimerInfo myTimer, ILogger log)
         {
             TimeZoneInfo jstTimeZone = TZConvert.GetTimeZoneInfo("Tokyo Standard Time");
             DateTime utcTime = DateTime.UtcNow;
@@ -22,7 +22,7 @@ namespace kanazawa.Function
             log.LogInformation($"C# Timer trigger function executed at: {jstTime}");
 
             // Qiita APIのURL
-            string url = "https://qiita.com/api/v2/users/" + await Parameter.getQiitaUserName() + "/items";
+            string url = "https://qiita.com/api/v2/users/" + Parameter.getQiitaUserName() + "/items";
             // 投稿記事情報取得
             string json = await GetJson(url);
 
@@ -34,7 +34,7 @@ namespace kanazawa.Function
             };
 
             // デシリアライズ
-            List<QiitaInformationModel> models = JsonConvert.DeserializeObject<List<QiitaInformationModel>>(json, settings);
+        List<QiitaInformationModel> models = JsonConvert.DeserializeObject<List<QiitaInformationModel>>(json, settings);
 
             // 各投稿記事のView数を取得
             string getViewsCountUrl;
@@ -47,7 +47,7 @@ namespace kanazawa.Function
             }
 
             // DB接続文字列の取得
-            var connectionString = await Parameter.getConnectionString();
+            var connectionString = Parameter.getConnectionString();
 
             // データ保存
             using (var connection = new SqlConnection(connectionString))
@@ -80,7 +80,7 @@ namespace kanazawa.Function
         {
             var httpClient = new System.Net.Http.HttpClient();
             // OAuth 2.0 Authorization Headerの設定
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await Parameter.getQiitaAccessToken());
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Parameter.getQiitaAccessToken());
 
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             HttpResponseMessage response = await httpClient.SendAsync(request);
