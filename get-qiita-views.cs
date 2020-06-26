@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Data.SqlClient;
+using TimeZoneConverter;
 
 namespace kanazawa.Function
 {
@@ -15,7 +16,10 @@ namespace kanazawa.Function
         [FunctionName("get_qiita_views")]
         public static async void Run([TimerTrigger("0 0 * * * *")]TimerInfo myTimer, ILogger log)
         {
-            log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
+            TimeZoneInfo jstTimeZone = TZConvert.GetTimeZoneInfo("Tokyo Standard Time");
+            DateTime utcTime = DateTime.UtcNow;
+            DateTime jstTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, jstTimeZone);
+            log.LogInformation($"C# Timer trigger function executed at: {jstTime}");
 
             // Qiita APIのURL
             string url = "https://qiita.com/api/v2/users/" + await Parameter.getQiitaUserName() + "/items";
@@ -57,7 +61,7 @@ namespace kanazawa.Function
                     Database.checkMasterData(models, log, connection);
 
                     // データを保存
-                    Database.saveData(models, log, connection);
+                    Database.saveData(models, jstTime, log, connection);
                 }
                 catch (Exception exception)
                 {

@@ -72,7 +72,7 @@ namespace kanazawa.Function
             }
         }
 
-        public static void saveData(List<QiitaInformationModel> models, ILogger log, SqlConnection connection)
+        public static void saveData(List<QiitaInformationModel> models, DateTime jstTime, ILogger log, SqlConnection connection)
         {
             using (var transaction = connection.BeginTransaction())
             {
@@ -85,7 +85,7 @@ namespace kanazawa.Function
                             // SQLの準備
                             command.CommandText = @"INSERT INTO page_views_count VALUES (@ID, @COUNTED_AT, @PAGE_VIEWS_COUNT)";
                             command.Parameters.Add(new SqlParameter("@ID", model.Id));
-                            command.Parameters.Add(new SqlParameter("@COUNTED_AT", DateTime.Now.ToString("yyyy/MM/dd HH")));
+                            command.Parameters.Add(new SqlParameter("@COUNTED_AT", jstTime.ToString("yyyy/MM/dd HH")));
                             command.Parameters.Add(new SqlParameter("@PAGE_VIEWS_COUNT", model.PageViewsCount));
 
                             // SQLの実行
