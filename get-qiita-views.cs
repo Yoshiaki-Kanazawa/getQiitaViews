@@ -14,7 +14,7 @@ namespace kanazawa.Function
     public static class get_qiita_views
     {
         [FunctionName("get_qiita_views")]
-        public static async void Run([TimerTrigger("0 * * * * *")]TimerInfo myTimer, ILogger log)
+        public static async void Run([TimerTrigger("0 0 * * * *")]TimerInfo myTimer, ILogger log)
         {
             TimeZoneInfo jstTimeZone = TZConvert.GetTimeZoneInfo("Tokyo Standard Time");
             DateTime utcTime = DateTime.UtcNow;
