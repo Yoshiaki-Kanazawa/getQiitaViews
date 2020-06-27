@@ -34,7 +34,7 @@ namespace kanazawa.Function
             };
 
             // デシリアライズ
-        List<QiitaInformationModel> models = JsonConvert.DeserializeObject<List<QiitaInformationModel>>(json, settings);
+            List<QiitaInformationModel> models = JsonConvert.DeserializeObject<List<QiitaInformationModel>>(json, settings);
 
             // 各投稿記事のView数を取得
             string getViewsCountUrl;
