@@ -8,6 +8,7 @@ namespace kanazawa.Function
 {
     public class Database
     {
+        // 新たに記事が投稿された場合はマスタテーブルを更新
         public static void checkMasterData(List<QiitaInformationModel> models, ILogger log, SqlConnection connection)
         {
             using (var transaction = connection.BeginTransaction())
@@ -72,6 +73,7 @@ namespace kanazawa.Function
             }
         }
 
+        // 各記事のview数を保存
         public static void saveData(List<QiitaInformationModel> models, DateTime jstTime, ILogger log, SqlConnection connection)
         {
             using (var transaction = connection.BeginTransaction())
