@@ -17,17 +17,13 @@ namespace kanazawa.Function
                 {
                     using (var selectCommand = new SqlCommand() { Connection = connection, Transaction = transaction })
                     {
-                        // SQLの準備
                         selectCommand.CommandText = @"SELECT id FROM qiita_items";
-
-                        // SQLの実行
                         var table = new DataTable();
                         var adapter = new SqlDataAdapter(selectCommand);
                         adapter.Fill(table);
 
                         // 存在フラグ
-                        bool flg = false;
-
+                        bool flg;
                         foreach (var model in models)
                         {
                             flg = false;
@@ -44,28 +40,23 @@ namespace kanazawa.Function
                             {
                                 using (var insertCommand = new SqlCommand() { Connection = connection, Transaction = transaction })
                                 {
-                                    // SQLの準備
                                     insertCommand.CommandText = @"INSERT INTO qiita_items VALUES (@ID, @TITLE, @CREATED_AT)";
                                     insertCommand.Parameters.Add(new SqlParameter("@ID", model.Id));
                                     insertCommand.Parameters.Add(new SqlParameter("@TITLE", model.Title));
                                     insertCommand.Parameters.Add(new SqlParameter("@CREATED_AT", model.CreatedAt));
 
-                                    // SQLの実行
                                     insertCommand.ExecuteNonQuery();
-
                                     log.LogInformation($"succeeded to insert master data: {model.Title}");
                                 }
                             }
                         }
                     }
 
-                    // コミット
                     transaction.Commit();
                     log.LogInformation("Committed");
                 }
                 catch
                 {
-                    // ロールバック
                     transaction.Rollback();
                     log.LogInformation("Rollbacked");
                     throw;
@@ -84,26 +75,21 @@ namespace kanazawa.Function
                     {
                         using (var command = new SqlCommand() { Connection = connection, Transaction = transaction })
                         {
-                            // SQLの準備
                             command.CommandText = @"INSERT INTO page_views_count VALUES (@ID, @COUNTED_AT, @PAGE_VIEWS_COUNT)";
                             command.Parameters.Add(new SqlParameter("@ID", model.Id));
                             command.Parameters.Add(new SqlParameter("@COUNTED_AT", jstTime.ToString("yyyy/MM/dd HH")));
                             command.Parameters.Add(new SqlParameter("@PAGE_VIEWS_COUNT", model.PageViewsCount));
 
-                            // SQLの実行
                             command.ExecuteNonQuery();
-
                             log.LogInformation($"succeeded to insert data: {model.Title}");
                         }
                     }
 
-                    // コミット
                     transaction.Commit();
                     log.LogInformation("Committed");
                 }
                 catch
                 {
-                    // ロールバック
                     transaction.Rollback();
                     log.LogInformation("Rollbacked");
                     throw;

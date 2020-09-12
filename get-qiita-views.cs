@@ -21,22 +21,15 @@ namespace kanazawa.Function
             DateTime jstTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, jstTimeZone);
             log.LogInformation($"C# Timer trigger function executed at: {jstTime}");
 
-            // Qiita APIのURL
             string url = "https://qiita.com/api/v2/users/" + Parameter.getQiitaUserName() + "/items";
-            // 投稿記事情報取得
             string json = await GetJson(url);
-
-            // デシリアライズ時の設定
             var settings = new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore,
                 MissingMemberHandling = MissingMemberHandling.Ignore
             };
-
-            // デシリアライズ
             List<QiitaInformationModel> models = JsonConvert.DeserializeObject<List<QiitaInformationModel>>(json, settings);
 
-            // 各投稿記事のView数を取得
             string getViewsCountUrl;
             foreach (var model in models)
             {
@@ -46,21 +39,13 @@ namespace kanazawa.Function
                 log.LogInformation($"views: {model.PageViewsCount}");
             }
 
-            // DB接続文字列の取得
             var connectionString = Parameter.getConnectionString();
-
-            // データ保存
             using (var connection = new SqlConnection(connectionString))
             {
-                // データベースの接続開始
                 connection.Open();
-
                 try
                 {
-                    // マスタテーブルの更新チェック
                     Database.checkMasterData(models, log, connection);
-
-                    // データを保存
                     Database.saveData(models, jstTime, log, connection);
                 }
                 catch (Exception exception)
@@ -70,7 +55,6 @@ namespace kanazawa.Function
                 }
                 finally
                 {
-                    // データベースの接続終了
                     connection.Close();
                 }
             }
@@ -79,7 +63,6 @@ namespace kanazawa.Function
         private static async Task<string> GetJson(string url)
         {
             var httpClient = new System.Net.Http.HttpClient();
-            // OAuth 2.0 Authorization Headerの設定
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Parameter.getQiitaAccessToken());
 
             var request = new HttpRequestMessage(HttpMethod.Get, url);
